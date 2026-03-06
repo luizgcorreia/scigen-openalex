@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
 use strict;
+use FindBin;
+use lib $FindBin::Bin;
 use scigen;
 use IO::File;
 use Getopt::Long;
