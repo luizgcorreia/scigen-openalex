@@ -113,16 +113,20 @@ for (my $i = 0; $i < $count; $i++) {
     my $title = scigen::generate ($dat, "SCI_TITLE", $RE, 0, 1);
     
     # 3. Abstract
-    # The grammar rule SCI_ABSTRACT in scirules.in is quite short.
-    # We combine it with SCI_INTRO (usually the introduction paragraphs)
-    # to generate a much longer, more realistic-looking abstract.
-    my $abstract = scigen::generate ($dat, "SCI_ABSTRACT", $RE, 0, 1);
-    $abstract =~ s/\\section\*?\{Abstract\}//i;
+    # We want a longer abstract. The grammar rule SCI_ABSTRACT in scirules.in
+    # currently only expands to "SCI_INTRO_A SCI_ABSTRACT_A SCI_INTRO_THESIS".
+    # We will construct an extended abstract programmatically so it still reads like an abstract.
     
-    my $intro = scigen::generate ($dat, "SCI_INTRO", $RE, 0, 1);
-    $intro =~ s/\\section\*?\{[^\}]+\}//i; # Remove any intro header
+    my $abs_intro = scigen::generate ($dat, "SCI_INTRO_A", $RE, 0, 1);
+    my $abs_thesis = scigen::generate ($dat, "SCI_INTRO_THESIS", $RE, 0, 1);
     
-    $abstract = $abstract . " " . $intro;
+    # Generate 5 additional abstract body sentences
+    my $abs_body = "";
+    for (my $j = 0; $j < 5; $j++) {
+        $abs_body .= scigen::generate ($dat, "SCI_ABSTRACT_A", $RE, 0, 1) . " ";
+    }
+    
+    my $abstract = "$abs_intro $abs_body $abs_thesis";
     
     # 4. Keywords
     my $keywords = scigen::generate ($dat, "SCI_BUZZWORD_ADJ", $RE, 0, 1) . " " . scigen::generate ($dat, "SCI_BUZZWORD_NOUN", $RE, 0, 1) . ", " .
