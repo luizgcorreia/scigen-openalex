@@ -74,12 +74,21 @@ sub escape_csv {
     $str =~ s/\\}/\)/g;
     $str =~ s/\\//g;
     $str =~ s/cite\{[^\}]+\}//g;
+    $str =~ s/Figure~ref\{[^\}]+\}//g; # Remove latex Figure~ref{...}
+    $str =~ s/Figure~ref//g; # Just in case it's generated without {}
+    
     if (defined $sysname) { 
         $str =~ s/\{SYSNAME\}/$sysname/g;
     }
+    
     $str =~ s/\{[^\}]+\}//g;
     $str =~ s/\n/ /g;
     $str =~ s/\s+/ /g;
+    
+    # Strip double periods that arise from concatenation
+    $str =~ s/\.\./\./g;
+    $str =~ s/ \./\./g;
+    
     $str =~ s/^\s+//;
     $str =~ s/\s+$//;
     
@@ -113,20 +122,33 @@ for (my $i = 0; $i < $count; $i++) {
     my $title = scigen::generate ($dat, "SCI_TITLE", $RE, 0, 1);
     
     # 3. Abstract
-    # We want a longer abstract. The grammar rule SCI_ABSTRACT in scirules.in
-    # currently only expands to "SCI_INTRO_A SCI_ABSTRACT_A SCI_INTRO_THESIS".
-    # We will construct an extended abstract programmatically so it still reads like an abstract.
+    # The user wants an IMRaD-structured abstract (Introduction, Methods, Results, Discussion).
+    # We will assemble it by pulling from specific grammar rules that match these sections.
     
-    my $abs_intro = scigen::generate ($dat, "SCI_INTRO_A", $RE, 0, 1);
-    my $abs_thesis = scigen::generate ($dat, "SCI_INTRO_THESIS", $RE, 0, 1);
+    # Introduction
+    my $abs_intro = scigen::generate ($dat, "SCI_INTRO_A", $RE, 0, 1) . " " . 
+                    scigen::generate ($dat, "SCI_INTRO_THESIS", $RE, 0, 1);
     
-    # Generate 5 additional abstract body sentences
-    my $abs_body = "";
-    for (my $j = 0; $j < 5; $j++) {
-        $abs_body .= scigen::generate ($dat, "SCI_ABSTRACT_A", $RE, 0, 1) . " ";
+    # Methods (from core abstract rule)
+    my $abs_methods = "";
+    for (my $j = 0; $j < 2; $j++) {
+        my $sentence = scigen::generate ($dat, "SCI_ABSTRACT_A", $RE, 0, 1);
+        $sentence =~ s/\s+$//;
+        $abs_methods .= $sentence . ". ";
     }
     
-    my $abstract = "$abs_intro $abs_body $abs_thesis";
+    # Results (from Evaluation section analysis)
+    my $res1 = scigen::generate ($dat, "EVAL_ANALYZE_ONE", $RE, 0, 1);
+    $res1 =~ s/\s+$//;
+    my $res2 = scigen::generate ($dat, "EVAL_ANALYZE_ONE", $RE, 0, 1);
+    $res2 =~ s/\s+$//;
+    my $abs_results = "$res1. $res2.";
+                      
+    # Discussion/Conclusion (from Conclusion section)
+    my $abs_discussion = scigen::generate ($dat, "CONCL_INTRO", $RE, 0, 1) . " " .
+                         scigen::generate ($dat, "CONCL_CONCL", $RE, 0, 1);
+    
+    my $abstract = "$abs_intro $abs_methods $abs_results $abs_discussion";
     
     # 4. Keywords
     my $keywords = scigen::generate ($dat, "SCI_BUZZWORD_ADJ", $RE, 0, 1) . " " . scigen::generate ($dat, "SCI_BUZZWORD_NOUN", $RE, 0, 1) . ", " .
