@@ -113,12 +113,16 @@ for (my $i = 0; $i < $count; $i++) {
     my $title = scigen::generate ($dat, "SCI_TITLE", $RE, 0, 1);
     
     # 3. Abstract
-    # The grammar rule SCI_ABSTRACT in scirules.in includes \section*{Abstract} 
-    # and spans multiple paragraphs. We want to generate it and strip LaTeX.
+    # The grammar rule SCI_ABSTRACT in scirules.in is quite short.
+    # We combine it with SCI_INTRO (usually the introduction paragraphs)
+    # to generate a much longer, more realistic-looking abstract.
     my $abstract = scigen::generate ($dat, "SCI_ABSTRACT", $RE, 0, 1);
-    
-    # Remove the \section*{Abstract} from the beginning if it exists
     $abstract =~ s/\\section\*?\{Abstract\}//i;
+    
+    my $intro = scigen::generate ($dat, "SCI_INTRO", $RE, 0, 1);
+    $intro =~ s/\\section\*?\{[^\}]+\}//i; # Remove any intro header
+    
+    $abstract = $abstract . " " . $intro;
     
     # 4. Keywords
     my $keywords = scigen::generate ($dat, "SCI_BUZZWORD_ADJ", $RE, 0, 1) . " " . scigen::generate ($dat, "SCI_BUZZWORD_NOUN", $RE, 0, 1) . ", " .
