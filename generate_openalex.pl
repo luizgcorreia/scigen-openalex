@@ -70,8 +70,8 @@ sub escape_csv {
     $str =~ s/\\subsection\{([^\}]+)\}/$1/g;
     $str =~ s/\\em\s+([^\}]+)\}/$1/g;
     $str =~ s/\{\\em\s+([^\}]+)\}/$1/g;
-    $str =~ s/\\{/\(/g;
-    $str =~ s/\\}/\)/g;
+    $str =~ s/\\\{/\(/g;
+    $str =~ s/\\\}/\)/g;
     $str =~ s/\\//g;
     $str =~ s/cite\{[^\}]+\}//g;
     $str =~ s/Figure~ref\{[^\}]+\}//g; # Remove latex Figure~ref{...}
