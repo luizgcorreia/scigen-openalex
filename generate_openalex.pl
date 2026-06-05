@@ -104,7 +104,7 @@ if( !defined $csv_fh ) {
 }
 
 # CSV Header
-print $csv_fh "source_provider,id,title,abstract_text,authorships,publication_year,cited_by_count,citation_normalized_percentile,doi,oa_status,primary_location,countries,topics,type,language,keywords,has_fulltext\n";
+print $csv_fh "source_provider,id,title,abstract_text,authorships,publication_year,cited_by_count,citation_normalized_percentile,doi,oa_status,primary_location,countries,topics,type,language,keywords,has_fulltext,problem,method,finding,interpretation\n";
 
 print "Generating $count OpenAlex records to $outfile...\n";
 
@@ -174,7 +174,12 @@ for (my $i = 0; $i < $count; $i++) {
     my $csv_keywords = escape_csv($keywords, $sysname);
     my $csv_has_fulltext = escape_csv("False", $sysname);
     
-    print $csv_fh "$csv_source_provider,$csv_id,$csv_title,$csv_abstract,$csv_authorships,$csv_publication_year,$csv_cited_by_count,$csv_citation_norm,$csv_doi,$csv_oa_status,$csv_primary_location,$csv_countries,$csv_topics,$csv_type,$csv_language,$csv_keywords,$csv_has_fulltext\n";
+    my $csv_problem = escape_csv($abs_intro, $sysname);
+    my $csv_method = escape_csv($abs_methods, $sysname);
+    my $csv_finding = escape_csv($abs_results, $sysname);
+    my $csv_interpretation = escape_csv($abs_discussion, $sysname);
+    
+    print $csv_fh "$csv_source_provider,$csv_id,$csv_title,$csv_abstract,$csv_authorships,$csv_publication_year,$csv_cited_by_count,$csv_citation_norm,$csv_doi,$csv_oa_status,$csv_primary_location,$csv_countries,$csv_topics,$csv_type,$csv_language,$csv_keywords,$csv_has_fulltext,$csv_problem,$csv_method,$csv_finding,$csv_interpretation\n";
     
     if ($i > 0 && $i % 100 == 0) {
         print "  $i records generated...\n";
